@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import { openSTXTransfer } from '@stacks/connect';
 // import { StacksTestnet } from '@stacks/network';
+import { useNavigate } from 'react-router-dom'
 import { polygon, area } from "@turf/turf";
 import { AppConfig, UserSession, showConnect } from '@stacks/connect';
 const appConfig = new AppConfig(['store_write', 'publish_data']);
@@ -13,7 +14,7 @@ import "leaflet/dist/leaflet.css"; // Import Leaflet's CSS
 import { Select, Input, Button, Checkbox } from "@chakra-ui/react"; // Using Chakra UI for Select and Input
 import L from "leaflet";
 import { EditControl } from "react-leaflet-draw";
-
+import { useGeolocated } from "react-geolocated";
 // Fix Leaflet's default icon path
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -25,13 +26,20 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 function App() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [chosenArea, setChosenArea] = useState(null);
   const [walletInformation, setWalletInformation] = useState(null)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const featureGroupRef = useRef(null)
-
+  const { coords, isGeolocationAvailable, isGeolocationEnabled } =
+    useGeolocated({
+      positionOptions: {
+        enableHighAccuracy: false,
+      },
+      userDecisionTimeout: 5000,
+    });
   // Handle events for drawn layers
   const handleDrawCreate = (e) => {
     const layer = e.layer;
@@ -75,6 +83,7 @@ function App() {
         console.log(userData)
         setWalletInformation(userData)
         setLoading(false)
+        navigate("/")
       },
       userSession,
     });
@@ -101,10 +110,15 @@ function App() {
   }, [walletInformation])
 
   return (
-    <div className="mx-auto container">
-      <div className="flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold my-5">InFarmerity Insurance Registration</h1>
-        <div className="w-11/12 md:w-8/12">
+    <div className="flex h-screen">
+      <div className='hidden md:block w-9/12 relative'>
+        <div className='h-full bg-cover bg-center bg-no-repeat' style={{ backgroundImage: "url('https://images.unsplash.com/photo-1619918456538-df5b5290950b?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')" }}>
+          <div className='w-full h-full bg-gradient-to-b from-black to-transparent opacity-70'></div>
+          <h1 className="text-2xl font-bold my-5 text-white absolute top-0 left-4">InFarmerity Insurance</h1>
+        </div>
+      </div>
+      <div className="flex flex-col items-center overflow-y-scroll">
+        <div className="w-11/12">
           <div>
             <div className="my-3">
               <p className="text-lg font-semibold">What do you grow on your farm?</p>
@@ -131,9 +145,9 @@ function App() {
               </p>
             </div>
             <Select>
-              <option>High Risk (3 STX per Area)</option>
-              <option>Medium Risk (1.5 STX per Area)</option>
-              <option>Low Risk (0.5 STX per Area)</option>
+              <option>High Risk (1,5 STX per Hectares)</option>
+              <option>Medium Risk (1 STX per Hectares)</option>
+              <option>Low Risk (0.005 STX per Hectares)</option>
             </Select>
           </div>
           <div className="my-5">
@@ -142,11 +156,11 @@ function App() {
               <p className="text-sm">
                 Use the map below to outline your farm area. You can draw polygons to mark your land boundaries. Ensure the selected area matches your farm size for accurate premium calculations.
               </p>
-              <Button size={"sm"} className="my-2" colorScheme="orange" variant={"outline"}>
+              <Button size={"sm"} className="my-2" colorScheme="green" variant={"outline"}>
                 Enable Location
               </Button>
             </div>
-            <div className="p-3 bg-orange-600 rounded-t-lg font-semibold text-sm text-white">
+            <div className="p-3 bg-green-600 rounded-t-lg font-semibold text-sm text-white">
               <p>Coordinates: {chosenArea?.coordinate.join(",")}</p>
               <p>Size: {(chosenArea?.size || 0 / 10000).toFixed(2)} Hectares</p>
             </div>
@@ -186,7 +200,7 @@ function App() {
           <div className="my-3">
             <Checkbox>By registering for InFarmerity Insurance, you agree to the following <a href="#" className='underline'>terms and conditions</a></Checkbox>
           </div>
-          <button className="w-full p-3 rounded-lg bg-orange-500 text-white mb-5" onClick={authenticate}>
+          <button className="w-full p-3 rounded-lg bg-green-500 text-white mb-5" onClick={authenticate}>
             {!loading ? (
               <>Sign with <b>Stacks Wallet</b></>
             ) : (
@@ -195,8 +209,8 @@ function App() {
           </button>
         </div>
       </div>
-      {walletInformation && <div>Welcome, {walletInformation.profile.stxAddress.testnet}</div>}
-      {data && <div>Current Balance: {data.balance / 1000000} STX</div>}
+      {/* {walletInformation && <div>Welcome, {walletInformation.profile.stxAddress.testnet}</div>}
+      {data && <div>Current Balance: {data.balance / 1000000} STX</div>} */}
     </div>
 
   )
