@@ -1,16 +1,22 @@
 import React from "react";
 import { TbDeviceDesktop, TbClock, TbPlant, TbMapPin, TbCalendarEvent } from "react-icons/tb";
-import { Alert, AlertIcon, Box, AlertTitle, AlertDescription } from "@chakra-ui/react";
+import { Alert, AlertIcon, Box, AlertTitle, AlertDescription, Badge } from "@chakra-ui/react";
 import AccountCard from "@/components/AccountCard"
 function AboutFarm() {
     return (
-        <div className="flex flex-col md:flex-row gap-4 mx-4">
-            <div className="border p-4 rounded-lg space-y-1 w-full md:w-8/12">
-                <h1>Your Farm</h1>
+        <div className="flex flex-col md:flex-row gap-4 mx-2">
+            <div className="border p-4 rounded-lg space-y-1 w-full">
+                <h1 className="text-xl font-bold">Your Farm Status</h1>
                 {/* Farm Type */}
                 <div className="flex items-center gap-2">
                     <TbPlant size={18} className="text-green-500" />
-                    <h1 className="font-medium">Farm Type: Corn and Rice</h1>
+                    <h1 className="font-medium">Insurance</h1>
+                    <Badge color={"green.500"}>Active</Badge>
+                </div>
+                {/* Farm Type */}
+                <div className="flex items-center gap-2">
+                    <TbPlant size={18} className="text-green-500" />
+                    <h1 className="font-medium">Type: Corn and Rice</h1>
                 </div>
 
                 {/* Planting Time */}
@@ -58,7 +64,6 @@ function AboutFarm() {
                     </Box>
                 </Alert>
             </div>
-            <AccountCard />
         </div>
     );
 }

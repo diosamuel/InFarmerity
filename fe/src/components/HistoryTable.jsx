@@ -56,7 +56,7 @@ function HistoryTable() {
                 </Thead>
                 {/* Table Body */}
                 <Tbody>
-                    {[...transactions, ...transactions, ...transactions].map((tx) => (
+                    {[...transactions].map((tx) => (
                         <Tr key={tx.no}>
                             <Td>{tx.no}</Td>
                             <Td>{tx.date}</Td>

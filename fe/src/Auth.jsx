@@ -1,20 +1,18 @@
-import { useState, useEffect, useRef } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import { openSTXTransfer } from '@stacks/connect';
-// import { StacksTestnet } from '@stacks/network';
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { polygon, area } from "@turf/turf";
 import { AppConfig, UserSession, showConnect } from '@stacks/connect';
-const appConfig = new AppConfig(['store_write', 'publish_data']);
-const userSession = new UserSession({ appConfig });
 import axios from 'axios';
-import { MapContainer, TileLayer, Marker, Popup, FeatureGroup } from "react-leaflet";
-import "leaflet/dist/leaflet.css"; // Import Leaflet's CSS
-import { Select, Input, Button, Checkbox } from "@chakra-ui/react"; // Using Chakra UI for Select and Input
+import { MapContainer, TileLayer, Marker, Popup, FeatureGroup, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { Select, Input, Button, Checkbox } from "@chakra-ui/react";
 import L from "leaflet";
 import { EditControl } from "react-leaflet-draw";
 import { useGeolocated } from "react-geolocated";
+
+const appConfig = new AppConfig(['store_write', 'publish_data']);
+const userSession = new UserSession({ appConfig });
+
 // Fix Leaflet's default icon path
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -25,14 +23,28 @@ L.Icon.Default.mergeOptions({
   shadowUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
+
+const UpdateMapCenter = ({ center }) => {
+  const map = useMap();
+  map.setView(center, map.getZoom());
+  return null;
+};
 function App() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState({ lat: -5.358857, lng: 105.315353 }); // Default coordinates
   const [chosenArea, setChosenArea] = useState(null);
   const [walletInformation, setWalletInformation] = useState(null)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const featureGroupRef = useRef(null)
+  const [formData, setFormData] = useState({
+    cropType: '',
+    startDate: '',
+    riskCategory: '',
+    coordinate: null,
+    size: null,
+  });
   const { coords, isGeolocationAvailable, isGeolocationEnabled } =
     useGeolocated({
       positionOptions: {
@@ -45,10 +57,12 @@ function App() {
     const layer = e.layer;
     const geojson = layer.toGeoJSON();
     const poly = polygon(geojson.geometry.coordinates);
-    setChosenArea({
+    const result = {
       coordinate: geojson.geometry.coordinates[0][0],
       size: area(poly)
-    })
+    }
+    setChosenArea(result)
+    setFormData({...formData,...result})
   };
 
   const handleDrawEdited = (e) => {
@@ -70,7 +84,12 @@ function App() {
     setChosenArea(null)
   };
 
-  let authenticate = () => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  let StacksAuthenticate = () => {
     setLoading(true)
     showConnect({
       appDetails: {
@@ -86,6 +105,9 @@ function App() {
         navigate("/")
       },
       userSession,
+      onCancel:()=>{
+        setLoading(true)
+      }
     });
   }
 
@@ -95,7 +117,7 @@ function App() {
       setError(null); // Reset error state
       try {
         const response = await axios.get(
-          `https://api.testnet.hiro.so/extended/v1/address/${walletInformation.profile.stxAddress.testnet}/stx`
+          `https://api.testnet.hiro.so/extended/v1/address/${walletInformation?.profile?.stxAddress?.testnet}/stx`
         );
         setData(response.data); // Set fetched data
         console.log(response.data)
@@ -109,6 +131,27 @@ function App() {
     fetchData();
   }, [walletInformation])
 
+  const handleEnableLocation = () => {
+    if (isGeolocationAvailable && isGeolocationEnabled && coords) {
+      console.log(coords)
+      setCurrentLocation({ lat: coords.latitude, lng: coords.longitude });
+    } else {
+      alert("Geolocation is unavailable or not enabled. Please check your settings.");
+    }
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form Data:', formData);
+
+    if (!formData.cropType || !formData.startDate || !formData.riskCategory || !formData.size || !formData.coordinate) {
+      alert("Please complete all fields before submitting the form.");
+      return;
+    }
+
+    // Process or send the form data
+    StacksAuthenticate()
+  };
   return (
     <div className="flex h-screen">
       <div className='hidden md:block w-9/12 relative'>
@@ -118,7 +161,7 @@ function App() {
         </div>
       </div>
       <div className="flex flex-col items-center overflow-y-scroll">
-        <div className="w-11/12">
+        <form className="w-11/12" onSubmit={handleFormSubmit}>
           <div>
             <div className="my-3">
               <p className="text-lg font-semibold">What do you grow on your farm?</p>
@@ -126,7 +169,7 @@ function App() {
                 Please specify the type of crops you cultivate. This will help us determine the best insurance policy tailored to your needs.
               </p>
             </div>
-            <Input placeholder="Crop Type" />
+            <Input placeholder="Crop Type" name="cropType" value={formData.cropType} onChange={handleInputChange} />
           </div>
           <div>
             <div className="my-3">
@@ -135,7 +178,7 @@ function App() {
                 Select the start date of your farming activity. This information will be used to calculate the coverage period for your insurance.
               </p>
             </div>
-            <Input placeholder="Select Date" size="md" type="date" />
+            <Input placeholder="Select Date" size="md" type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} />
           </div>
           <div>
             <div className="my-3">
@@ -144,7 +187,8 @@ function App() {
                 Choose the risk category that reflects your farm's conditions. Higher risk areas may have higher premiums but provide more coverage.
               </p>
             </div>
-            <Select>
+            <Select name="riskCategory" value={formData.riskCategory}
+              onChange={handleInputChange}>
               <option>High Risk (1,5 STX per Hectares)</option>
               <option>Medium Risk (1 STX per Hectares)</option>
               <option>Low Risk (0.005 STX per Hectares)</option>
@@ -156,8 +200,8 @@ function App() {
               <p className="text-sm">
                 Use the map below to outline your farm area. You can draw polygons to mark your land boundaries. Ensure the selected area matches your farm size for accurate premium calculations.
               </p>
-              <Button size={"sm"} className="my-2" colorScheme="green" variant={"outline"}>
-                Enable Location
+              <Button size={"sm"} className="my-2" colorScheme="green" variant={"outline"} onClick={handleEnableLocation}>
+                Current Location
               </Button>
             </div>
             <div className="p-3 bg-green-600 rounded-t-lg font-semibold text-sm text-white">
@@ -166,12 +210,12 @@ function App() {
             </div>
             <div className="w-full h-[30em] border">
               <MapContainer
-                center={[-5.358857142758962, 105.31535375096503]} // Default coordinates
+                center={[currentLocation.lat, currentLocation.lng]}
                 zoom={20}
                 scrollWheelZoom={true}
                 style={{ width: "100%", height: "100%" }}
               >
-                {/* Tile Layer */}
+                <UpdateMapCenter center={[currentLocation.lat, currentLocation.lng]} />
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution="&copy; OpenStreetMap contributors"
@@ -200,17 +244,15 @@ function App() {
           <div className="my-3">
             <Checkbox>By registering for InFarmerity Insurance, you agree to the following <a href="#" className='underline'>terms and conditions</a></Checkbox>
           </div>
-          <button className="w-full p-3 rounded-lg bg-green-500 text-white mb-5" onClick={authenticate}>
+          <button className="w-full p-3 rounded-lg bg-green-500 text-white mb-5" type='submit'>
             {!loading ? (
               <>Sign with <b>Stacks Wallet</b></>
             ) : (
               <span className="animate-pulse transition-all">Loading</span>
             )}
           </button>
-        </div>
+        </form>
       </div>
-      {/* {walletInformation && <div>Welcome, {walletInformation.profile.stxAddress.testnet}</div>}
-      {data && <div>Current Balance: {data.balance / 1000000} STX</div>} */}
     </div>
 
   )

@@ -1,0 +1,90 @@
+{
+  "apply": [
+    {
+      "block_identifier": {
+        "hash": "0x39ab3fd6ad317da49ac9f067a1b25173dcfe645e48cd34648d7cbaeb9c786548",
+        "index": 28581
+      },
+      "metadata": {
+        "bitcoin_anchor_block_identifier": {
+          "hash": "0x362a09bbf24bb0f921371e6325a602767c8bd9b6150244556021900a63d5076c",
+          "index": 4647
+        },
+        "block_time": 1736573461,
+        "confirm_microblock_identifier": null,
+        "cycle_number": null,
+        "pox_cycle_index": 227,
+        "pox_cycle_length": 20,
+        "pox_cycle_position": 6,
+        "reward_set": null,
+        "signer_bitvec": "013800000027ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "signer_public_keys": [
+          "0x02e8620935d58ebffa23c260f6917cbd0915ea17d7a46df17e131540237d335504",
+          "0x036a44f61d85efa844b42475f107b106dc8fb209ae27813893c3269c59821e0333"
+        ],
+        "signer_signature": [
+          "01fb632e0607f765f694b272ef36070341007e4bac92ecf365c990f826059347357fbdc8ff94d8caa08a16447722030fa0561a588a6fb86932d1ab60eba0ca1f03",
+          "016dcefad59471d84f0dc0c4c11db937ba12af07f62186a7eb9fe8f188318dc2a41616fc315b53751f035790f3dfb21ad687eb4ee963bc9172027b4fe789e64568"
+        ],
+        "stacks_block_hash": "0xeb23e9d0c0ad0860d937136129b9925efd11a3e870402e44ed4a62254e97dea5",
+        "tenure_height": 2390
+      },
+      "parent_block_identifier": {
+        "hash": "0x1e43ddd64cc295a5427b072862459ae366dbe9165569e828b622d8f7a974b5fd",
+        "index": 28580
+      },
+      "timestamp": 1736573406,
+      "transactions": [
+        {
+          "metadata": {
+            "description": "invoked: ST1AYA1J87KWP7MT2966QSTFVVWZNPFTW9ZZRT8ED.cobacounter::get-counter()",
+            "execution_cost": {
+              "read_count": 4,
+              "read_length": 330,
+              "runtime": 1112,
+              "write_count": 0,
+              "write_length": 0
+            },
+            "fee": 165,
+            "kind": {
+              "data": {
+                "args": [],
+                "contract_identifier": "ST1AYA1J87KWP7MT2966QSTFVVWZNPFTW9ZZRT8ED.cobacounter",
+                "method": "get-counter"
+              },
+              "type": "ContractCall"
+            },
+            "nonce": 16,
+            "position": { "index": 1 },
+            "raw_tx": "0x8080000000040055e506483cf963d342498d7ce9fbdf3f5b3f5c4f000000000000001000000000000000a500001ead6cf3baaaaa488e6a52e681c453374e8c0ba870c43f6227494648bd8c75893d631d18469d0991e48ca7d884a7d72fc74e7926ec1e26d14c61ac0fee83f6cd030100000000021a55e506483cf963d342498d7ce9fbdf3f5b3f5c4f0b636f6261636f756e7465720b6765742d636f756e74657200000000",
+            "receipt": {
+              "contract_calls_stack": [],
+              "events": [],
+              "mutated_assets_radius": [],
+              "mutated_contracts_radius": []
+            },
+            "result": "(ok 4)",
+            "sender": "ST1AYA1J87KWP7MT2966QSTFVVWZNPFTW9ZZRT8ED",
+            "sponsor": null,
+            "success": true
+          },
+          "operations": [],
+          "transaction_identifier": {
+            "hash": "0x7f3288cb79484fb188fbcb78c6429074404108e3fe5f92ae4bc7bfc77cb648c5"
+          }
+        }
+      ]
+    }
+  ],
+  "chainhook": {
+    "is_streaming_blocks": true,
+    "predicate": {
+      "contract_identifier": "ST1AYA1J87KWP7MT2966QSTFVVWZNPFTW9ZZRT8ED.cobacounter",
+      "method": "get-counter",
+      "scope": "contract_call"
+    },
+    "uuid": "51ed926c-452a-4dc1-ac1b-7433b047204d"
+  },
+  "events": [],
+  "rollback": []
+}
